@@ -15,6 +15,7 @@ from bert import tokenization
 
 from model import model_fn_builder
 from feature_input import InputExample, filed_based_convert_examples_to_features, file_based_input_fn_builder
+from data_process_utils import create_example
 
 flags = tf.flags
 
@@ -145,8 +146,19 @@ class NerProcessor(DataProcessor):
 
     def _create_example(self, lines, set_type):
         """Analysize the lines according to the set type"""
-        
-
+        examples = []
+        for line in lines:
+            origin_exs = create_example(line)
+            # 长度切分
+            for ex in origin_exs:
+                guid = ex["newsId"]
+                text = " ".join(ex["seq"])
+                if set_type == "test":
+                    label = None
+                else:
+                    label = " ".join(ex["label"])
+                examples.append(InputExample(guid=guid, text=text, label=label))
+        return examples
 
 
 def main(_):
